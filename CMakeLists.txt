@@ -86,7 +86,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
 # Linker options
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
-    # -T "${CMAKE_SOURCE_DIR}/STM32H750XBHx_RAM.ld"
+    -T "${CMAKE_SOURCE_DIR}/STM32G431CBTx_COSTUM.ld"
     # -u _printf_float # STDIO float formatting support (remove if not used)
 )
 
