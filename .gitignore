@@ -1,0 +1,7 @@
+.vscode/
+.mxproject
+build/
+Flash.bat
+Flash.jlink
+Debug.jdebug
+Debug.jdebug.user
