@@ -48,11 +48,28 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    "App/app_main.c"
+    "App/letterShell/shell_cmd_list.c"
+    "App/letterShell/shell_companion.c"
+    "App/letterShell/shell_ext.c"
+    "App/letterShell/shell.c"
+    "App/letterShell/shell_port.c"
+    "Drv/driver/drv_uart.c"
+    "Drv/lwrb/lwrb.c"
+    "Drv/lwrb/lwrb_ex.c"
+    "Drv/segger/RTT.c"
+    "Drv/segger/SEGGER_RTT_printf.c"
+    "Drv/segger/SEGGER_RTT.c"
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+    "App"
+    "App/letterShell"
+    "Drv/driver"
+    "Drv/lwrb"
+    "Drv/segger"
 )
 
 # Add project symbols (macros)
@@ -65,4 +82,17 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+)
+
+# Linker options
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+    # -T "${CMAKE_SOURCE_DIR}/STM32H750XBHx_RAM.ld"
+    # -u _printf_float # STDIO float formatting support (remove if not used)
+)
+
+# Execute post-build to print size, generate hex and bin
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    # COMMAND ${CMAKE_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_PROJECT_NAME}.hex
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_PROJECT_NAME}.bin
 )
