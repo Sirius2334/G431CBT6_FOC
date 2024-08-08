@@ -1,36 +1,80 @@
 #include "app_main.h"
 
+uint32_t uAdcValue, vAdcValue, wAdcValue;
+float uVoltage, vVoltage, wVoltage;
+
+void adc_get_value(void)
+{
+    // HAL_ADCEx_InjectedStart(&hadc1);
+    // HAL_ADCEx_InjectedStart(&hadc2);
+    uAdcValue = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
+    vAdcValue = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
+    wAdcValue = HAL_ADCEx_InjectedGetValue(&hadc2, ADC_INJECTED_RANK_1);
+}
+
 void app_main(void)
 {
-    char string[10], c;
-    uint32_t rb_len;
-    int16_t temp;
+    char c;
+    uint16_t TS_CAL1, TS_CAL2;
+    uint32_t adc_temp;
+    float temperture;
+
+    HAL_OPAMP_Start(&hopamp1);
+    HAL_OPAMP_Start(&hopamp2);
+    HAL_OPAMP_Start(&hopamp3);
+    HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+    HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED);
+
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+    HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+
+    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_3, 0);
+
+    HAL_ADCEx_InjectedStart(&hadc1);
+    HAL_ADCEx_InjectedStart(&hadc2);
+    __HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_JEOC);
+    __HAL_ADC_ENABLE_IT(&hadc2, ADC_IT_JEOC);
+
+    __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, 3950);
 
     rtt_init();
     uart_init(&huart1);
     userShellInit(&shell);
 
     rtt_printf("Hello World!\r\n");
-    uart_printf(&huart1, "hello world, arg = %.2f\r\n", 3.14);
+    // uart_printf(&huart1, "hello world, arg = %.2f\r\n", 3.14);
+
+    TS_CAL1 = *(__IO uint16_t *)(0x1FFF75A8);
+    TS_CAL2 = *(__IO uint16_t *)(0x1FFF75CA);
 
     for (;;)
     {
-        // rb_len = (uint32_t)lwrb_read(&rx_ringbuf, string, 9);
-        // if (rb_len != 0)
-        // {
-        //     uart_printf(&huart1, "ringbuff return string = \"%s\"\r\n", string);
-        //     // HAL_Delay(5);
-        //     uart_printf(&huart1, "ringbuff return len = %d\r\n", rb_len);
-        // }
-
         if (lwrb_read(&rx_ringbuf, &c, 1))
         {
             shellHandler(&shell, c);
         }
         HAL_Delay(10);
 
-        // HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-        // HAL_Delay(1000);
+        // HAL_ADC_Start(&hadc1);
+        // adc_temp = HAL_ADC_GetValue(&hadc1);                                           /* 读取数值 */
+        // temperture = (130.0 - 30.0) * (adc_temp - TS_CAL1) / (TS_CAL2 - TS_CAL1) + 30; /* 转换 */
+        // uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
+
+        uVoltage = 3.3f * uAdcValue / 4096;
+        vVoltage = 3.3f * vAdcValue / 4096;
+        wVoltage = 3.3f * wAdcValue / 4096;
+
+        // uart_printf(&huart1, "adc value = %d, %d, %d\r\n", uAdcValue, vAdcValue, wAdcValue);
+        uart_printf(&huart1, "adc value = %f, %f, %f\r\n", uVoltage, vVoltage, wVoltage);
+        HAL_Delay(1000);
     }
 }
 
@@ -46,4 +90,19 @@ int func(int argc, char *argv[])
 
     return 0;
 }
-SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN), func, func, test);
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 func,
+                 func,
+                 test);
+
+int soft_reset(int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+    HAL_NVIC_SystemReset();
+    return 0;
+}
+SHELL_EXPORT_CMD(SHELL_CMD_PERMISSION(0) | SHELL_CMD_TYPE(SHELL_TYPE_CMD_MAIN),
+                 reset,
+                 soft_reset,
+                 soft reset);

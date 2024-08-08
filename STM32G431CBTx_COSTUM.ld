@@ -178,7 +178,7 @@ SECTIONS
     . = ALIGN(4);
 
     _shell_command_start = .;
-    KEEP (*(shellCommand))
+    KEEP (*(SORT(shellCommand)))
     _shell_command_end = .;
 
     . = ALIGN(4);

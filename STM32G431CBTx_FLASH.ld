@@ -173,17 +173,6 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  .letterShell :
-  {
-    . = ALIGN(4);
-
-    _shell_command_start = .;
-    KEEP (*(shellCommand))
-    _shell_command_end = .;
-
-    . = ALIGN(4);
-  } >FLASH
-
   
 
   /* Remove information from the standard libraries */
