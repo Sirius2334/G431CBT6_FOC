@@ -1,5 +1,6 @@
 .vscode/
 .mxproject
+CMakePresets.json
 build/
 Flash.bat
 Flash.jlink
