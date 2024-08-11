@@ -1,5 +1,8 @@
 #include "app_main.h"
 
+#define JScopeBufferSize 4096
+
+uint8_t *JScopeBuffer[JScopeBufferSize];
 uint32_t uAdcValue, vAdcValue, wAdcValue;
 float uVoltage, vVoltage, wVoltage;
 
@@ -10,6 +13,10 @@ void adc_get_value(void)
     uAdcValue = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_1);
     vAdcValue = HAL_ADCEx_InjectedGetValue(&hadc1, ADC_INJECTED_RANK_2);
     wAdcValue = HAL_ADCEx_InjectedGetValue(&hadc2, ADC_INJECTED_RANK_1);
+
+    SEGGER_RTT_Write(1, &uAdcValue, 2);
+    SEGGER_RTT_Write(1, &vAdcValue, 2);
+    SEGGER_RTT_Write(1, &wAdcValue, 2);
 }
 
 void app_main(void)
@@ -45,9 +52,11 @@ void app_main(void)
 
     __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, 3950);
 
-    rtt_init();
     uart_init(&huart1);
     userShellInit(&shell);
+
+    rtt_init();
+    SEGGER_RTT_ConfigUpBuffer(1, "JScope_u2u2u2", JScopeBuffer, JScopeBufferSize, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
 
     rtt_printf("Hello World!\r\n");
     // uart_printf(&huart1, "hello world, arg = %.2f\r\n", 3.14);
@@ -68,13 +77,13 @@ void app_main(void)
         // temperture = (130.0 - 30.0) * (adc_temp - TS_CAL1) / (TS_CAL2 - TS_CAL1) + 30; /* 转换 */
         // uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
 
-        uVoltage = 3.3f * uAdcValue / 4096;
-        vVoltage = 3.3f * vAdcValue / 4096;
-        wVoltage = 3.3f * wAdcValue / 4096;
+        // uVoltage = 3.3f * uAdcValue / 4096;
+        // vVoltage = 3.3f * vAdcValue / 4096;
+        // wVoltage = 3.3f * wAdcValue / 4096;
 
-        // uart_printf(&huart1, "adc value = %d, %d, %d\r\n", uAdcValue, vAdcValue, wAdcValue);
-        uart_printf(&huart1, "adc value = %f, %f, %f\r\n", uVoltage, vVoltage, wVoltage);
-        HAL_Delay(1000);
+        // // uart_printf(&huart1, "adc value = %d, %d, %d\r\n", uAdcValue, vAdcValue, wAdcValue);
+        // uart_printf(&huart1, "adc value = %f, %f, %f\r\n", uVoltage, vVoltage, wVoltage);
+        // HAL_Delay(1000);
     }
 }
 
