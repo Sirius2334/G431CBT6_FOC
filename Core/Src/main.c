@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "dma.h"
 #include "opamp.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -99,6 +100,7 @@ int main(void)
   MX_OPAMP2_Init();
   MX_OPAMP3_Init();
   MX_TIM1_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
   extern void app_main(void);
   app_main();

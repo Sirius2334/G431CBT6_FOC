@@ -43,6 +43,7 @@ add_subdirectory(cmake/stm32cubemx)
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
+    Drv/DSP/Lib/GCC
 )
 
 # Add sources to executable
@@ -54,6 +55,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "App/letterShell/shell_ext.c"
     "App/letterShell/shell.c"
     "App/letterShell/shell_port.c"
+    "Drv/dev/drv_mt6701.c"
     "Drv/driver/drv_uart.c"
     "Drv/lwrb/lwrb.c"
     "Drv/lwrb/lwrb_ex.c"
@@ -67,7 +69,9 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     "App"
     "App/letterShell"
+    "Drv/dev"
     "Drv/driver"
+    "Drv/DSP/Include"
     "Drv/lwrb"
     "Drv/segger"
 )
@@ -82,6 +86,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+    arm_cortexM4lf_math
 )
 
 # Linker options

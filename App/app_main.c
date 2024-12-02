@@ -2,6 +2,14 @@
 
 #define JScopeBufferSize 4096
 
+#define TS_CAL1 *((__IO uint16_t *)0x1FFF75A8) // 单位为mV
+#define TS_CAL2 *((__IO uint16_t *)0x1FFF75CA) // 单位为mV
+
+#define TS_TEMP_CAL1 30  // 温度为30度时，其AD值为TS_CAL1
+#define TS_TEMP_CAL2 130 // 温度为130度时，其AD值为TS_CAL2
+
+#define CalculateInternalTemperature(TS_DATA) (float)(TS_TEMP_CAL2 - TS_TEMP_CAL1) / (TS_CAL2 - TS_CAL1) * ((TS_DATA * 1.1) - TS_CAL1) + TS_TEMP_CAL1
+
 uint8_t *JScopeBuffer[JScopeBufferSize];
 uint32_t uAdcValue, vAdcValue, wAdcValue;
 float uVoltage, vVoltage, wVoltage;
@@ -22,7 +30,7 @@ void adc_get_value(void)
 void app_main(void)
 {
     char c;
-    uint16_t TS_CAL1, TS_CAL2;
+    // uint16_t TS_CAL1, TS_CAL2;
     uint32_t adc_temp;
     float temperture;
 
@@ -61,8 +69,10 @@ void app_main(void)
     rtt_printf("Hello World!\r\n");
     // uart_printf(&huart1, "hello world, arg = %.2f\r\n", 3.14);
 
-    TS_CAL1 = *(__IO uint16_t *)(0x1FFF75A8);
-    TS_CAL2 = *(__IO uint16_t *)(0x1FFF75CA);
+    // TS_CAL1 = *(__IO uint16_t *)(0x1FFF75A8);
+    // TS_CAL2 = *(__IO uint16_t *)(0x1FFF75CA);
+
+    float angle = 0;
 
     for (;;)
     {
@@ -72,10 +82,17 @@ void app_main(void)
         }
         HAL_Delay(10);
 
-        // HAL_ADC_Start(&hadc1);
-        // adc_temp = HAL_ADC_GetValue(&hadc1);                                           /* 读取数值 */
-        // temperture = (130.0 - 30.0) * (adc_temp - TS_CAL1) / (TS_CAL2 - TS_CAL1) + 30; /* 转换 */
-        // uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
+        angle = MT6701_GetFullAngle();
+        uart_printf(&huart1, "angle = %.2f\r\n", angle);
+        HAL_Delay(1000);
+
+        HAL_ADC_Start(&hadc1);
+        adc_temp = HAL_ADC_GetValue(&hadc1); /* 读取数值 */
+                                             // temperture = (float)(110 - 30) / (TS_CAL2 - TS_CAL1) * (adc_temp - TS_CAL1) + 30; /* 转换 */
+        temperture = __HAL_ADC_CALC_TEMPERATURE(3300, adc_temp, ADC_RESOLUTION_12B);
+        temperture = CalculateInternalTemperature(adc_temp);
+
+        uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
 
         // uVoltage = 3.3f * uAdcValue / 4096;
         // vVoltage = 3.3f * vAdcValue / 4096;
