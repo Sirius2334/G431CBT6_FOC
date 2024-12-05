@@ -1,5 +1,7 @@
 #include "app_main.h"
 
+#include "openloop.h"
+
 #define JScopeBufferSize 4096
 
 #define TS_CAL1 *((__IO uint16_t *)0x1FFF75A8) // 单位为mV
@@ -76,23 +78,24 @@ void app_main(void)
 
     for (;;)
     {
-        if (lwrb_read(&rx_ringbuf, &c, 1))
-        {
-            shellHandler(&shell, c);
-        }
-        HAL_Delay(10);
+        velocityOpenloop(10);
+        // if (lwrb_read(&rx_ringbuf, &c, 1))
+        // {
+        //     shellHandler(&shell, c);
+        // }
+        // HAL_Delay(10);
 
-        angle = MT6701_GetFullAngle();
-        uart_printf(&huart1, "angle = %.2f\r\n", angle);
-        HAL_Delay(1000);
+        // angle = MT6701_GetFullAngle();
+        // uart_printf(&huart1, "angle = %.2f\r\n", angle);
+        // HAL_Delay(1000);
 
-        HAL_ADC_Start(&hadc1);
-        adc_temp = HAL_ADC_GetValue(&hadc1); /* 读取数值 */
-                                             // temperture = (float)(110 - 30) / (TS_CAL2 - TS_CAL1) * (adc_temp - TS_CAL1) + 30; /* 转换 */
-        temperture = __HAL_ADC_CALC_TEMPERATURE(3300, adc_temp, ADC_RESOLUTION_12B);
-        temperture = CalculateInternalTemperature(adc_temp);
+        // HAL_ADC_Start(&hadc1);
+        // adc_temp = HAL_ADC_GetValue(&hadc1); /* 读取数值 */
+        //                                      // temperture = (float)(110 - 30) / (TS_CAL2 - TS_CAL1) * (adc_temp - TS_CAL1) + 30; /* 转换 */
+        // temperture = __HAL_ADC_CALC_TEMPERATURE(3300, adc_temp, ADC_RESOLUTION_12B);
+        // temperture = CalculateInternalTemperature(adc_temp);
 
-        uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
+        // uart_printf(&huart1, "chip temperture = %.2f\r\n", temperture);
 
         // uVoltage = 3.3f * uAdcValue / 4096;
         // vVoltage = 3.3f * vAdcValue / 4096;

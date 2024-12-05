@@ -62,6 +62,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     "Drv/segger/RTT.c"
     "Drv/segger/SEGGER_RTT_printf.c"
     "Drv/segger/SEGGER_RTT.c"
+    "Drv/FOC/openloop.c"
 )
 
 # Add include paths
@@ -72,6 +73,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     "Drv/dev"
     "Drv/driver"
     "Drv/DSP/Include"
+    "Drv/FOC"
     "Drv/lwrb"
     "Drv/segger"
 )
